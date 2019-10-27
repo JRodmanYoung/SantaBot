@@ -1,4 +1,5 @@
 # Secret Santa Algorithm
+# This file is outdated; please use niceListAlgorithm.py instead
 import random
 
 def santaAssign(emails, not_allowed):
