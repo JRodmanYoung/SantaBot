@@ -69,6 +69,16 @@ def santaAssign(emails, not_allowed):
                 
         
           
-emailList = ["Joe", "Will", "Charlotte", "Janet","Caitlin"]
-forbiddenPairs = [('Joe','Caitlin'),('Caitlin','Joe'),('Caitlin','Janet'),('Joe','Charlotte')]
+eFile = open('emails.txt','r')
+emailList = eFile.read().split()
+eFile.close()
+
+eFile = open('not_allowed.txt','r')
+forbiddenPairs = eFile.read().split()
+eFile.close()
+for i in range(len(forbiddenPairs)):
+    a, b = forbiddenPairs[i].strip("()").replace("'","").split(',')
+    forbiddenPairs[i] = (a,b)
+print emailList
+print forbiddenPairs
 print santaAssign(permuteList(emailList),forbiddenPairs)
