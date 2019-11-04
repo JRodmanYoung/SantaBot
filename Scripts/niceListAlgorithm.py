@@ -14,7 +14,7 @@ class Node(object):
     def removeEdgeTo(self, node):        #remove a name from the list of outgoing edges from the node
         self.to_list.remove(node)
         
-def permuteList(ordered_list):           #ensure nondeterministic outputs
+def permuteList(ordered_list):           #ensure nondeterministic outputs by permuting list of emails
         old_list = list(ordered_list)
         new_list = []
         
@@ -25,13 +25,13 @@ def permuteList(ordered_list):           #ensure nondeterministic outputs
         return new_list
 
 def santaAssign(emails, not_allowed):
-    nodeHash = {}
+    nodeHash = {}   #dictionary where key is string <email> and value is node representing <email>
     for email in emails:
-        nodeHash[email] = Node(emails)
-        nodeHash[email].removeEdgeFrom(email)
+        nodeHash[email] = Node(emails) #create a node for <email>
+        nodeHash[email].removeEdgeFrom(email) #make sure person cannot have themselves
         nodeHash[email].removeEdgeTo(email)
         
-    for i,j in not_allowed:
+    for i,j in not_allowed:     #make sure that nobody can be assigned to someone they don't want
         nodeHash[i].removeEdgeTo(j)
         nodeHash[j].removeEdgeFrom(i)
         
@@ -41,19 +41,19 @@ def santaAssign(emails, not_allowed):
     while True:
         activeNode = nodeHash[emails[n]]
         
-        if nodeHash[activeNode.to_list[m]].assigned_from == None:
+        if nodeHash[activeNode.to_list[m]].assigned_from == None: #check if mth person in activeNode's list of possible people is unassigned
             activeNode.assigned_to = activeNode.to_list[m]
             nodeHash[activeNode.assigned_to].assigned_from = emails[n]
             n += 1
             m = 0
-            if n == len(emails):
+            if n == len(emails): #if all n people have been assigned, then a viable solution has been found
                 solution = []
                 for email in emails:
                     solution.append((email,nodeHash[email].assigned_to))
                 return solution
-        elif m < len(activeNode.to_list) - 1:
+        elif m < len(activeNode.to_list) - 1: #if mth person is unavailable, check next person
             m += 1
-        else:
+        else: #if none of the people in activeNode's list of possible people are available, then unassign the previous node and increment m, decrement n
             while True:
                 n -= 1
                 assignment = nodeHash[emails[n]].assigned_to
@@ -62,13 +62,11 @@ def santaAssign(emails, not_allowed):
                 k = nodeHash[emails[n]].to_list.index(assignment)
                 nodeHash[assignment].assigned_from = None
                 assignment = None
-                
                 m = k + 1
                 if m < len(nodeHash[emails[n]].to_list):
                     break
                 
         
-          
 emailList = ["Joe", "Will", "Charlotte", "Janet","Caitlin"]
 forbiddenPairs = [('Joe','Caitlin'),('Caitlin','Joe'),('Caitlin','Janet'),('Joe','Charlotte')]
 print santaAssign(permuteList(emailList),forbiddenPairs)
