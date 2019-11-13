@@ -1,4 +1,5 @@
 import random #needed for random assignment
+from typing import Dict, List
 
 class Node(object):
 # create a node that represents a person
@@ -7,7 +8,7 @@ class Node(object):
         self.from_list = list(name_list2) #list of people that may be assigned to Node
         self.assigned_to = None          #track who Node is assigned to
         self.assigned_from = None        #track who is assigned to Node
-    
+   
     def removeEdgeFrom(self, node):      
     #remove a name from list of incoming edges to the node
         self.from_list.remove(node)
@@ -16,10 +17,10 @@ class Node(object):
     #remove a name from the list of outgoing edges from the node
         self.to_list.remove(node)
         
-def permuteList(ordered_list):           
+def permuteList(ordered_list: List):           
 #ensure nondeterministic outputs
-        old_list = list(ordered_list)
-        new_list = []
+        old_list: List = list(ordered_list)
+        new_list: List = []
         
         for i in range(len(old_list)):
             randIndex = random.randint(0, len(old_list) - 1)
@@ -27,11 +28,11 @@ def permuteList(ordered_list):
          
         return new_list
 
-def santaAssign(emails, not_allowed):
-    nodeHash = {}
+def santaAssign(emails: List, not_allowed: List):
+    nodeHash: dict = {}
     # dictionary mapping <name> to the Node that represents <name>
     emailsToList = permuteList(emails)
-    emailsFromList = permuteList(list(emails)) #randomize
+    emailsFromList = permuteList(emails) #randomize
     for email in emails:
         # create node, then ensure that a person is not assigned to themselves
         nodeHash[email] = Node(emailsToList,emailsFromList)
@@ -43,8 +44,8 @@ def santaAssign(emails, not_allowed):
         nodeHash[i].removeEdgeTo(j)
         nodeHash[j].removeEdgeFrom(i)
         
-    n = 0
-    m = 0
+    n: int = 0
+    m: int = 0
     
     while True:
         # use depth first search to find a suitable assignment for everyone
@@ -68,30 +69,39 @@ def santaAssign(emails, not_allowed):
             # if everyone on the nth person's to_list has been assigned, decrement n until an assignment can be made
             while True:
                 n -= 1
-                assignment = nodeHash[emails[n]].assigned_to
                 if n == -1:
                     # if the algorithm cycles backwards to the first person, and there is no one left on their to_list, then there is no solution
                     return "No solution available"
-                k = nodeHash[emails[n]].to_list.index(assignment)
-                nodeHash[assignment].assigned_from = None
-                assignment = None
-                m = k + 1
-                if m < len(nodeHash[emails[n]].to_list):
+                activeNode = nodeHash[emails[n]]
+                m = activeNode.to_list.index(activeNode.assigned_to) + 1
+                nodeHash[activeNode.assigned_to].assigned_from = None
+                activeNode.assigned_to = None
+                if m < len(activeNode.to_list):
                     break
                 
         
           
-eFile = open('emails.txt','r')
-emailList = eFile.read().split()
-eFile.close()
+with open('dummy_data/emails.txt','r') as e_File:
+    emailList = e_File.read().split()
+    emailList = list(set(emailList))
 
-eFile = open('not_allowed.txt','r')
-forbiddenPairs = eFile.read().split()
-eFile.close()
+with open('dummy_data/not_allowed.txt','r') as na_File:
+    forbiddenPairsRaw = na_File.read().split()
+    forbiddenPairsRaw = list(set(forbiddenPairsRaw))
 
-for i in range(len(forbiddenPairs)):
-    a, b = forbiddenPairs[i].strip("()").replace("'","").split(',')
-    forbiddenPairs[i] = (a,b)
-print emailList
-print forbiddenPairs
-print santaAssign(permuteList(emailList),forbiddenPairs)
+forbiddenPairs = []
+for i in range(len(forbiddenPairsRaw)):
+    a, b = forbiddenPairsRaw[i].strip("()").replace("'","").split(',')
+    forbiddenPairs.append((a,b))
+    try:
+        emailList.index(a)
+    except ValueError:
+        raise SystemExit("The name %r is in not_allowed.txt, but not in emails.txt" % a)
+    try:
+        emailList.index(b)
+    except ValueError:
+        raise SystemExit("The name %r is in not_allowed.txt, but not in emails.txt" % b)
+
+print(emailList)
+print(forbiddenPairs)
+print(santaAssign(permuteList(emailList),forbiddenPairs))
