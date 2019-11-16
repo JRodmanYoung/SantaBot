@@ -1,10 +1,13 @@
-Joe
-Caitlin
-Rachel
-Seth
-Ruth
-James
-Dani
-Luke
-Isaac
-Mary
+Liebnitz
+Euler
+Hilbert
+Lipschitz
+Lobachevsky
+Gauss
+Riemann
+Von Neumann
+Archimedes
+Pythagoras
+Erdos
+Newton
+Turing
