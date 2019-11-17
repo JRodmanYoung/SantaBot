@@ -85,33 +85,31 @@ def santaAssign(emails: List, not_allowed: List) -> List:
                 
         
 pathToDB: str = '../db/allYourSantaAreBelongToUs.db'
-#open connection to database
-connection = sqlite3.connect(pathToDB)
-dbCursor = connection.cursor()
 
-#get emails from database
-dbCursor.execute("SELECT email FROM people;")
-rawEmails: List = dbCursor.fetchall()     
-
+try:
+    #open connection to database
+    with sqlite3.connect(pathToDB) as connection:
+        dbCursor = connection.cursor()
+        #get emails from database
+        dbCursor.execute("SELECT email FROM people;")
+        rawEmails: List = dbCursor.fetchall()
+        #get constraints from database
+        dbCursor.execute("SELECT santa, assignment FROM forbiddenPairings;")
+        rawConstraints: List = dbCursor.fetchall()
+except:
+    raise SystemExit("There was an error. You need to run this script from Santabot/scripts")
+    
 #cleanse elements of rawEmails
 emailList: List = []
 for i in range(len(rawEmails)):
-    a = rawEmails[i][0].strip("()")
-    emailList.append(a)
+    emailList.append(rawEmails[i][0])
   
-#get constraints from database
-dbCursor.execute("SELECT santa, assignment FROM forbiddenPairings;")
-rawConstraints: List = dbCursor.fetchall()     
-
 #cleanse elements of rawConstraints
 constraintList: List = []
 for i in range(len(rawConstraints)):
     a: str = rawConstraints[i][0].strip("()")
     b: str = rawConstraints[i][1].strip("()")
     constraintList.append((a,b))
-print(constraintList)  
-connection.commit()
-connection.close()
 
 #print(emailList)
 #print(constraintList)
