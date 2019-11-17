@@ -10,14 +10,14 @@ class Node(object):
     def __init__(self, name_list1: List, name_list2: List):
         self.to_list: List = list(name_list1)   #list of people that Node may be assigned to
         self.from_list: List = list(name_list2) #list of people that may be assigned to Node
-        self.assigned_to: str = None          #track who Node is assigned to
-        self.assigned_from: str = None        #track who is assigned to Node
+        self.assigned_to: int = None          #track who Node is assigned to
+        self.assigned_from: int = None        #track who is assigned to Node
    
-    def removeEdgeFrom(self, node: str):      
+    def removeEdgeFrom(self, node: int):      
     #remove a name from list of incoming edges to the node
         self.from_list.remove(node)
     
-    def removeEdgeTo(self, node: str):       
+    def removeEdgeTo(self, node: int):       
     #remove a name from the list of outgoing edges from the node
         self.to_list.remove(node)
         
@@ -91,10 +91,10 @@ try:
     with sqlite3.connect(pathToDB) as connection:
         dbCursor = connection.cursor()
         #get emails from database
-        dbCursor.execute("SELECT email FROM people;")
+        dbCursor.execute("SELECT person_ID FROM people;")
         rawEmails: List = dbCursor.fetchall()
         #get constraints from database
-        dbCursor.execute("SELECT santa, assignment FROM forbiddenPairings;")
+        dbCursor.execute("SELECT santa_ID, assignment_ID FROM forbiddenPairings;")
         rawConstraints: List = dbCursor.fetchall()
 except:
     raise SystemExit("There was an error. You need to run this script from Santabot/scripts")
@@ -107,8 +107,8 @@ for i in range(len(rawEmails)):
 #cleanse elements of rawConstraints
 constraintList: List = []
 for i in range(len(rawConstraints)):
-    a: str = rawConstraints[i][0].strip("()")
-    b: str = rawConstraints[i][1].strip("()")
+    a: int = rawConstraints[i][0]
+    b: int = rawConstraints[i][1]
     constraintList.append((a,b))
 
 #print(emailList)
