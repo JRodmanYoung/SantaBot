@@ -123,7 +123,6 @@ try:
         dbCursor = connection.cursor()
         for ID in emailList:
             dbCursor.execute('SELECT email FROM people where person_ID = ?', (santaWeb[ID],))
-            emailString = dbCursor.fetchall()[0][0]
-            dbCursor.execute('UPDATE people SET givingTo = ?, givingTo_ID = ? WHERE person_ID = ?', (emailString, santaWeb[ID], ID))
+            dbCursor.execute('UPDATE people SET givingTo_ID = ? WHERE person_ID = ?', (santaWeb[ID], ID))
 except:
     raise SystemExit("There was an error. You need to run this script from Santabot/scripts")

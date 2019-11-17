@@ -2,7 +2,6 @@ CREATE TABLE people
 (
 	person_ID 			INTEGER PRIMARY KEY AUTOINCREMENT,
 	email				VARCHAR NOT NULL UNIQUE,
-	givingTo			VARCHAR,
 	givingTo_ID			INTEGER
 );
 
