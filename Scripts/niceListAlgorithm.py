@@ -62,9 +62,9 @@ def santaAssign(emails: List, not_allowed: List) -> List:
             m = 0
             if n == len(emails):
             # if the algorithm has assigned someone to the nth person, then a solution has been found
-                solution: List = []
+                solution: dict = {}
                 for email in emails:
-                    solution.append((email,nodeHash[email].assigned_to))
+                    solution[email] = nodeHash[email].assigned_to
                 return solution
         elif m < len(activeNode.to_list) - 1:
             # if the mth person on the nth person's to_list was unavailable, increment m
@@ -113,4 +113,16 @@ for i in range(len(rawConstraints)):
 
 #print(emailList)
 #print(constraintList)
-print(santaAssign(permuteList(emailList),constraintList))
+santaWeb = santaAssign(permuteList(emailList),constraintList)
+#print(santaWeb)
+
+#put assignments into database
+try:
+    #open connection to database
+    with sqlite3.connect(pathToDB) as connection:
+        dbCursor = connection.cursor()
+        for ID in emailList:
+            dbCursor.execute('SELECT email FROM people where person_ID = ?', (santaWeb[ID],))
+            dbCursor.execute('UPDATE people SET givingTo_ID = ? WHERE person_ID = ?', (santaWeb[ID], ID))
+except:
+    raise SystemExit("There was an error. You need to run this script from Santabot/scripts")
