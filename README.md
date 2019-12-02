@@ -1,5 +1,3 @@
 # SantaBot
 
-SantaBot takes all of the names of a group of people and randomly assigns each person a name that is not their own.
-
-I don't know what else to put here.
+SantaBot is a web application whose goal is to create assignments for a 'secret santa' gift exchange. This project is ongoing, but the core functionality is present in the niceListAlgorithm.py script. This project employs a SQLite database and an API built with the Flask framework.
