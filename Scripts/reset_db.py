@@ -55,5 +55,6 @@ try:
     INSERT INTO forbiddenPairings (santa, santa_ID, assignment, assignment_ID)
     VALUES (?,?,?,?);""", (constraint[0], DBsantaID, constraint[1], DBassignmentID))
     connection.commit()
+    connection.close()
 except:
     raise SystemExit("You need to run this script from Santabot/scripts")
