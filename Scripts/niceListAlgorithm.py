@@ -120,9 +120,8 @@ santaWeb = santaAssign(permuteList(emailList),constraintList)
 try:
     #open connection to database
     with sqlite3.connect(pathToDB) as connection:
-        #dbCursor = connection.cursor()
+        dbCursor = connection.cursor()
         for ID in emailList:
-            dbCursor.execute('SELECT email FROM people where person_ID = ?', (santaWeb[ID],))
             dbCursor.execute('UPDATE people SET givingTo_ID = ? WHERE person_ID = ?', (santaWeb[ID], ID))
 except:
     raise SystemExit("There was an error. You need to run this script from Santabot/scripts")

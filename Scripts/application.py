@@ -14,20 +14,21 @@ def hello_world():
 def return_all_people():
     
     if request.method == "POST":
+        # add person to database
         posted_email = request.get_json()['email']
         with sqlite3.connect(path_to_db) as connection:
             cursor = connection.cursor()
             cursor.execute('INSERT into people (email) VALUES (?);', (posted_email,))            
     
-    # returns a json of all people
+    # return a json of all people
     with sqlite3.connect(path_to_db) as connection:
         cursor = connection.cursor()
         #get all of the people
         cursor.execute('SELECT person_ID, email, givingTo_ID FROM people')
         raw_data: List = cursor.fetchall()
-        data: Dict = {}
-        for person in raw_data:
-            data[person[0]] = {"email": person[1], "assignment ID": person[2]}
+        data: List = []
+        for entry in raw_data:
+            data.append({"person_ID": entry[0], "email": entry[1], "assignment ID": entry[2]})
         json_data = json.dumps(data)
     return json_data
     
@@ -80,10 +81,10 @@ def return_forbidden_pairings():
         cursor = connection.cursor()
         cursor.execute('SELECT constraint_ID, santa, santa_ID, assignment, assignment_ID FROM forbiddenPairings;')
         raw_data: List = cursor.fetchall()
-        data: Dict = {}
+        data: List = []
         for pair in raw_data:
-            json_data = json.dumps(data)
-            data[pair[0]] = {"santa": pair[1], "santa_ID": pair[2], "assignment": pair[3], "assignment_ID": pair[4]}
+            data.append({"constraint_ID": pair[0], "santa": pair[1], "santa_ID": pair[2], "assignment": pair[3], "assignment_ID": pair[4]})
+        json_data = json.dumps(data)
     return json_data
     
 @app.route('/api/v1/forbidden_pairing/<id>')
