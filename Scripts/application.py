@@ -1,7 +1,8 @@
 import sqlite3
 import json
-from typing import Dict
+from typing import Dict, List, Tuple
 from flask import Flask, request
+
 app = Flask(__name__)
 
 path_to_db = '../db/allYourSantaAreBelongToUs.db'
@@ -53,8 +54,8 @@ def return_person(person_id: str) -> str:
             try:
                 command = 'SELECT person_ID, email, givingTo_ID FROM people WHERE person_ID=?;'
                 cursor.execute(command, (person_id,))
-                raw_data: List = cursor.fetchall()
-                data: Dict = {raw_data[0][0]:{"email": raw_data[0][1], "assignment ID": raw_data[0][2]}}
+                raw_data: Tuple = cursor.fetchone()
+                data: List = [{"person_ID": raw_data[0], "email": raw_data[1], "assignment ID": raw_data[2]}]
                 json_data = json.dumps(data)
             except:
                 return('There was an error. Check that the requested ID is valid.')
@@ -105,8 +106,8 @@ def return_pairing(id: str) -> str:
             cursor = connection.cursor()
             try:
                 cursor.execute('SELECT constraint_ID, santa, santa_ID, assignment, assignment_ID FROM forbiddenPairings WHERE constraint_ID=?;', (id,))
-                raw_data: List = cursor.fetchall()
-                data: Dict = {raw_data[0][0]:{"santa": raw_data[0][1], "santa_ID": raw_data[0][2], "assignment": raw_data[0][3], "assignment_ID": raw_data[0][4]}}
+                raw_data: Tuple = cursor.fetchone()
+                data: List = [{"constraint_ID": raw_data[0], "santa": raw_data[1], "santa_ID": raw_data[2], "assignment": raw_data[3], "assignment_ID": raw_data[4]}]
                 json_data = json.dumps(data)
             except:
                 return('There was an error. Check that the requested ID is valid.')
