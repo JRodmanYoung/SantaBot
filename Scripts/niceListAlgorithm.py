@@ -13,15 +13,15 @@ class Node(object):
         self.assigned_to: int = None          #track who Node is assigned to
         self.assigned_from: int = None        #track who is assigned to Node
    
-    def removeEdgeFrom(self, node: int):      
+    def remove_edge_from(self, node: int):      
     #remove a name from list of incoming edges to the node
         self.from_list.remove(node)
     
-    def removeEdgeTo(self, node: int):       
+    def remove_edge_to(self, node: int):       
     #remove a name from the list of outgoing edges from the node
         self.to_list.remove(node)
         
-def permuteList(ordered_list: List) -> List:       
+def permute_list(ordered_list: List) -> List:       
 #ensure nondeterministic outputs
         old_list: List = list(ordered_list)
         new_list: List = []
@@ -32,21 +32,21 @@ def permuteList(ordered_list: List) -> List:
          
         return new_list
 
-def santaAssign(emails: List, not_allowed: List) -> List:
+def santa_assign(emails: List, not_allowed: List) -> List:
     nodeHash: dict = {}
     # dictionary mapping <name> to the Node that represents <name>
-    emailsToList: List = permuteList(emails)
-    emailsFromList: List = permuteList(emails) #randomize
+    emails_to_list: List = permute_list(emails)
+    emails_from_list: List = permute_list(emails) #randomize
     for email in emails:
         # create node, then ensure that a person is not assigned to themselves
-        nodeHash[email] = Node(emailsToList,emailsFromList)
-        nodeHash[email].removeEdgeFrom(email)
-        nodeHash[email].removeEdgeTo(email)
+        nodeHash[email] = Node(emails_to_list,emails_from_list)
+        nodeHash[email].remove_edge_from(email)
+        nodeHash[email].remove_edge_to(email)
         
     for i,j in not_allowed:
         # ensure compliance with restricted pairings
-        nodeHash[i].removeEdgeTo(j)
-        nodeHash[j].removeEdgeFrom(i)
+        nodeHash[i].remove_edge_to(j)
+        nodeHash[j].remove_edge_from(i)
         
     n: int = 0
     m: int = 0
@@ -95,33 +95,31 @@ try:
         rawEmails: List = dbCursor.fetchall()
         #get constraints from database
         dbCursor.execute("SELECT santa_ID, assignment_ID FROM forbiddenPairings;")
-        rawConstraints: List = dbCursor.fetchall()
+        raw_constraints: List = dbCursor.fetchall()
 except:
     raise SystemExit("There was an error. You need to run this script from Santabot/scripts")
     
 #cleanse elements of rawEmails
-emailList: List = []
+email_list: List = []
 for i in range(len(rawEmails)):
-    emailList.append(rawEmails[i][0])
+    email_list.append(rawEmails[i][0])
   
-#cleanse elements of rawConstraints
-constraintList: List = []
-for i in range(len(rawConstraints)):
-    a: int = rawConstraints[i][0]
-    b: int = rawConstraints[i][1]
-    constraintList.append((a,b))
+#cleanse elements of raw_constraints
+constraint_list: List = []
+for i in range(len(raw_constraints)):
+    a: int = raw_constraints[i][0]
+    b: int = raw_constraints[i][1]
+    constraint_list.append((a,b))
 
-#print(emailList)
-#print(constraintList)
-santaWeb = santaAssign(permuteList(emailList),constraintList)
-#print(santaWeb)
+# create assignements
+santa_web = santa_assign(permute_list(email_list),constraint_list)
 
 #put assignments into database
 try:
     #open connection to database
     with sqlite3.connect(pathToDB) as connection:
         dbCursor = connection.cursor()
-        for ID in emailList:
-            dbCursor.execute('UPDATE people SET givingTo_ID = ? WHERE person_ID = ?', (santaWeb[ID], ID))
+        for ID in email_list:
+            dbCursor.execute('UPDATE people SET givingTo_ID = ? WHERE person_ID = ?', (santa_web[ID], ID))
 except:
     raise SystemExit("There was an error. You need to run this script from Santabot/scripts")
