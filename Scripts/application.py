@@ -12,50 +12,8 @@ path_to_db = '../db/allYourSantaAreBelongToUs.db'
 def hello_world():
     return 'Hello World!'
     
-@app.route('/api/v1/person', methods = ["GET","POST"])
-def return_all_people():
-    
-    if request.method == "POST":
-        # verify that request contains a valid request  
-        try:
-            request_json: Dict = request.get_json()
-        except:
-            abort(
-                400,
-                description = "Please verify that request contains valid json.")
-        try:
-            posted_email = request_json['email']
-        except:
-            abort(
-                400,
-                description = "Please verify that  request contains an email.")
-        
-        # add person to database         
-        with sqlite3.connect(path_to_db) as connection:
-            cursor = connection.cursor()
-            command = 'INSERT into people (email) VALUES (?);'
-            cursor.execute(command, (posted_email,)) 
-            
-            # first_name and last_name may or may not be in the request
-            request_json = defaultdict(lambda: None, request_json)
-            cursor.execute(
-                'INSERT into people (first_name) VALUES (?);',
-                (request_json['first_name'],))
-            cursor.execute(
-                'INSERT into people (last_name) VALUES (?);',
-                (request_json['last_name'],))
-        
-            #return posted record
-            cursor.execute('SELECT last_insert_rowid()')
-            posted_record: List = cursor.fetchone()
-            data: Dict = {
-                "person_ID": posted_record[0],
-                "email": posted_record[1],
-                "givingTo_ID": posted_record[2], 
-                "first_name": posted_record[3],
-                "last_name": posted_record[4]}
-            return json.dumps(data)
-        
+@app.route('/api/v1/person')
+def get_all_people():
     
     if request.method == "GET":
         # return a json of all people
@@ -63,7 +21,7 @@ def return_all_people():
             cursor = connection.cursor()
             #get all of the people
             cursor.execute(
-                'SELECT person_ID, email, givingTo_ID, first_name, last_name'
+                'SELECT person_ID, email, givingTo_ID, first_name, last_name '
                 'FROM people')
             raw_data: List = cursor.fetchall()
             data: List = []
@@ -76,9 +34,55 @@ def return_all_people():
                     "last_name": entry[4]})
             json_data = json.dumps(data)
         return json_data
+        
+@app.route('/api/v1/person', methods = ["POST"])
+def person_request():
     
+    # verify that request contains a valid request  
+    try:
+        request_json: Dict = request.get_json()
+    except:
+        abort(
+            400 ,
+            description = "Please verify that request contains valid json.")
+    try:
+        posted_email = request_json['email']
+    except:
+        abort(
+            400,
+            description = "Please verify that  request contains an email.")
+    
+    # add person to database         
+    with sqlite3.connect(path_to_db) as connection:
+        cursor = connection.cursor()
+        # first_name and last_name may or may not be in the request
+        request_json = defaultdict(lambda: None, request_json)
+        command = ('INSERT into people (email, first_name, last_name) '
+                   'VALUES (?, ?, ?);')
+        
+        cursor.execute(
+            command,
+            (
+                posted_email,
+                request_json['first_name'],
+                request_json['last_name']
+                ))
+        
+        # return posted record
+        cursor.execute('SELECT (person_ID, email, givingTo_ID, first_name, '
+                       'last_name) FROM people WHERE '
+                       'person_ID=last_insert_rowid();')
+        posted_record: List = cursor.fetchone()
+        data: Dict = {
+            "person_ID": posted_record[0],
+            "email": posted_record[1],
+            "givingTo_ID": posted_record[2], 
+            "first_name": posted_record[3],
+            "last_name": posted_record[4]}
+        return json.dumps(data)
+ 
 @app.route('/api/v1/person/<person_id>', methods = ["GET","DELETE"])
-def return_person(person_id: str) -> str:
+def get_person(person_id: str) -> str:
     if request.method == "DELETE":
         with sqlite3.connect(path_to_db) as connection: 
             cursor = connection.cursor()
@@ -114,83 +118,85 @@ def return_person(person_id: str) -> str:
                     'There was an error. Check that the requested ID is valid.')
         return json_data
     
-@app.route('/api/v1/forbidden_pairing', methods = ["GET","POST"])
-def return_forbidden_pairings():
+@app.route('/api/v1/forbidden_pairing')
+def get_forbidden_pairings():
     
-    if request.method == "POST":
-    
-        # verify that request contains a valid request  
-        try:
-            request_json = request.get_json()
-        except:
-            abort(
-                400,
-                description = "Please verify that request contains valid json.")
-        try:
-            new_giver_constraint = request_json['santa_ID']
-        except:
-            abort(
-                400,
-                description = "Please verify that request contains a "
-                              "'santa_ID' key.")
-        try:
-            new_receiver_constraint = request_json['assignment_ID']
-        except:
-            abort(
-                400,
-                description = "Please verify that request contains an "
-                              "'assignment_ID' key.")
+    # returns a json of all forbidden pairings
+    with sqlite3.connect(path_to_db) as connection:
+        cursor = connection.cursor()
+        cursor.execute('SELECT constraint_ID, santa, santa_ID, assignment, '
+                       'assignment_ID FROM forbiddenPairings;')
+        raw_data: List = cursor.fetchall()
+        data: List = []
+        for pair in raw_data:
+            data.append(
+                {
+                    "constraint_ID": pair[0],
+                    "santa": pair[1],
+                    "santa_ID": pair[2],
+                    "assignment": pair[3],
+                    "assignment_ID": pair[4]})
+        json_data = json.dumps(data)
+    return json_data
         
+@app.route('/api/v1/forbidden_pairing', methods = ["POST"])
+def forbidden_pairing_request():
+    
+    # verify that request is valid
+    try:
+        request_json = request.get_json()
+    except:
+        abort(
+            400,
+            description = "Please verify that request contains valid json.")
+    try:
+        new_giver_constraint = request_json['santa_ID']
+    except:
+        abort(
+            400,
+            description = "Please verify that request contains a "
+                          "'santa_ID' key.")
+    try:
+        new_receiver_constraint = request_json['assignment_ID']
+    except:
+        abort(
+            400,
+            description = "Please verify that request contains an "
+                          "'assignment_ID' key.")
+    
+    with sqlite3.connect(path_to_db) as connection:
         # add new constraint to database
-        with sqlite3.connect(path_to_db) as connection:
-            cursor = connection.cursor()
-            command = 'SELECT (email) FROM people WHERE person_ID = ?;'
-            cursor.execute(command, (new_giver_constraint,))
-            giver_ID = cursor.fetchone()[0]
-            cursor.execute(command, (new_receiver_constraint,)) # finish swapping IDs for emails!!!
-            receiver_ID = cursor.fetchone()[0]
-            command = ('INSERT into forbiddenPairings (santa, santa_ID '
-                       'assignment, assignment_ID) VALUES (?, ?, ?, ?);')
-            cursor.execute(
-                command,
-                (
-                    new_giver_constraint,
-                    giver_ID,
-                    new_receiver_constraint,
-                    receiver_ID))
-             
-            #return posted record
-            cursor.execute('SELECT last_insert_rowid()')
-            posted_record: List = cursor.fetchone()
-            data: Dict = {
-                "constraint_ID": posted_record[0],
-                "santa": posted_record[1],
-                "santa_ID": posted_record[2], 
-                "assignment": posted_record[3],
-                "assignment_ID": posted_record[4]}
-            return json.dumps(data)
-    
-    if request.method == "GET":
-        # returns a json of all forbidden pairings
-        with sqlite3.connect(path_to_db) as connection:
-            cursor = connection.cursor()
-            cursor.execute('SELECT constraint_ID, santa, santa_ID, assignment, '
-                           'assignment_ID FROM forbiddenPairings;')
-            raw_data: List = cursor.fetchall()
-            data: List = []
-            for pair in raw_data:
-                data.append(
-                    {
-                        "constraint_ID": pair[0],
-                        "santa": pair[1],
-                        "santa_ID": pair[2],
-                        "assignment": pair[3],
-                        "assignment_ID": pair[4]})
-            json_data = json.dumps(data)
-        return json_data
-    
-@app.route('/api/v1/forbidden_pairing/<id>')
-def return_pairing(id: str) -> str:
+        cursor = connection.cursor()
+        command = 'SELECT email FROM people WHERE person_ID = ?;'
+        cursor.execute(command, (new_giver_constraint,))
+        giver_ID = cursor.fetchone()[0]
+        cursor.execute(command, (new_receiver_constraint,))
+        receiver_ID = cursor.fetchone()[0]
+        command = ('INSERT into forbiddenPairings (santa, santa_ID, '
+                   'assignment, assignment_ID) VALUES (?, ?, ?, ?);')
+        cursor.execute(
+            command,
+            (
+                new_giver_constraint,
+                giver_ID,
+                new_receiver_constraint,
+                receiver_ID))
+         
+        #return posted record
+        cursor.execute('SELECT constraint_ID, santa, santa_ID, assignment,'
+                       ' assignment_ID FROM forbiddenPairings WHERE '
+                       'constraint_ID=last_insert_rowid();')
+        posted_record: List = cursor.fetchone()
+        data: Dict = {
+            "constraint_ID": posted_record[0],
+            "santa": posted_record[1],
+            "santa_ID": posted_record[2], 
+            "assignment": posted_record[3],
+            "assignment_ID": posted_record[4]}
+        return json.dumps(data)
+
+@app.route('/api/v1/forbidden_pairing/<id>', methods = ['GET', 'DELETE'])
+def get_pairing(id: str) -> str:
     if request.method == 'DELETE':
         with sqlite3.connect(path_to_db) as connection: 
             cursor = connection.cursor()
