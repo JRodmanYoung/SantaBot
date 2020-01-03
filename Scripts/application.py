@@ -14,7 +14,7 @@ def hello_world():
     return 'Hello World!'
     
 @app.route('/api/v1/person')
-def get_all_people():
+def get_persons():
        
     # return a json of all people
     with sqlite3.connect(path_to_db) as connection:
@@ -198,7 +198,7 @@ def post_forbidden_pairing():
         return json.dumps(data)
 
 @app.route('/api/v1/forbidden_pairing/<id>')
-def get_pairing(id: str) -> str:   
+def get_forbidden_pairing(id: str) -> str:   
  
     # returns a json of specified ID
     with sqlite3.connect(path_to_db) as connection:
@@ -223,7 +223,7 @@ def get_pairing(id: str) -> str:
     return json_data
         
 @app.route('/api/v1/forbidden_pairing/<id>', methods = ['DELETE'])
-def delete_pairing(id: str) -> str:
+def delete_forbidden_pairing(id: str) -> str:
 
     with sqlite3.connect(path_to_db) as connection: 
         cursor = connection.cursor()
