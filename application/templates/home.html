@@ -6,20 +6,24 @@
 	<body>
 		<h1>Greetings, Meatbag. Welcome to SantaBot.</h1>
 		<table>
-			<tr>
-				<th>first_name</th>
-				<th>last_name</th>
-				<th>email</th>
-				<th>action</th>
-			<tr>
-			{% for user in users %}
-			<tr>
-				<td>{{ user['first_name'] }}</td>
-				<td>{{ user['last_name'] }}</td>
-				<td>{{ user['email'] }}</td>
-				<td>update</td>
-			</tr>
-			{% endfor %}
+			<thead>
+				<tr>
+					<th>first_name</th>
+					<th>last_name</th>
+					<th>email</th>
+					<th>action</th>
+				<tr>
+			</thead>
+			<tbody>
+				{% for user in users %}
+				<tr>
+					<td>{{ user['first_name'] }}</td>
+					<td>{{ user['last_name'] }}</td>
+					<td>{{ user['email'] }}</td>
+					<td>delete</td>
+				</tr>
+				{% endfor %}
+			</tbody>
 		</table>
 	<body>
 </html>
