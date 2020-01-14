@@ -1,0 +1,25 @@
+<html>
+	<head>
+		<title>Welcome to SantaBot</title>
+	</head>
+	
+	<body>
+		<h1>Greetings, Meatbag. Welcome to SantaBot.</h1>
+		<table>
+			<tr>
+				<th>first_name</th>
+				<th>last_name</th>
+				<th>email</th>
+				<th>action</th>
+			<tr>
+			{% for user in users %}
+			<tr>
+				<td>{{ user['first_name'] }}</td>
+				<td>{{ user['last_name'] }}</td>
+				<td>{{ user['email'] }}</td>
+				<td>update</td>
+			</tr>
+			{% endfor %}
+		</table>
+	<body>
+</html>

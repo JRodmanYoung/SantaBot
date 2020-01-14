@@ -1,21 +1,23 @@
 import sqlite3
 import json
 from typing import Dict, List, Tuple
-from flask import Flask, request, abort, jsonify
+from flask import request, abort, jsonify, render_template
 from collections import defaultdict
+from application import app
 
-app = Flask(__name__)
-
-path_to_db = '../db/allYourSantaAreBelongToUs.db'
+path_to_db = 'db/allYourSantaAreBelongToUs.db'
 BAD_REQUEST_ERROR = 400
-
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
     
+@app.route('/')
+@app.route('/home')
+def home():
+    users = json.loads(get_persons())
+    print(users[0])
+    return render_template('home.html', users=users)
+
 @app.route('/api/v1/person')
 def get_persons():
-       
+        
     # return a json of all people
     with sqlite3.connect(path_to_db) as connection:
         cursor = connection.cursor()
@@ -24,7 +26,7 @@ def get_persons():
             'SELECT person_ID, email, givingTo_ID, first_name, last_name '
             'FROM people')
         raw_data: List = cursor.fetchall()
-        data: List = []
+        data: List = [] 
         for entry in raw_data:
             data.append(
                 {"person_ID": entry[0],
