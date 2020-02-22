@@ -2,12 +2,12 @@ import sqlite3
 from typing import List
 
 #get list of emails from file
-with open('dummy_data/emails.txt','r') as email_file:
+with open('../dummy_data/emails.txt','r') as email_file:
     email_list: List = email_file.read().split('\n')
     email_list = list(set(email_list))
 
 #get list of constraints from file
-with open('dummy_data/not_allowed.txt','r') as not_allowed_file:
+with open('../dummy_data/not_allowed.txt','r') as not_allowed_file:
     raw_pairs: List = list(set(not_allowed_file.read().split('\n')))
 
 #turn list of strings into list of tuples
@@ -29,10 +29,10 @@ for i in range(len(raw_pairs)):
             f"The name {cleansed_pair[1]} is in not_allowed.txt, but not in "
             "emails.txt")
         
-pathToDB: str = '../db/allYourSantaAreBelongToUs.db'
+path_to_db: str = '../db/allYourSantaAreBelongToUs.db'
 
 try:
-    connection = sqlite3.connect(pathToDB)
+    connection = sqlite3.connect(path_to_db)
     DB_cursor = connection.cursor()
     
     #completely empty out the database

@@ -90,11 +90,11 @@ def santa_assign(ID_numbers: List, not_allowed: List) -> List:
                     break
                 
         
-pathToDB: str = '../db/allYourSantaAreBelongToUs.db'
+path_to_db: str = '../db/allYourSantaAreBelongToUs.db'
 
 try:
     #open connection to database
-    with sqlite3.connect(pathToDB) as connection:
+    with sqlite3.connect(path_to_db) as connection:
         dbCursor = connection.cursor()
         #get IDs from database
         dbCursor.execute("SELECT person_ID FROM people;")
@@ -126,7 +126,7 @@ santa_web = santa_assign(permute_list(ID_list),constraint_list)
 #put assignments into database
 try:
     #open connection to database
-    with sqlite3.connect(pathToDB) as connection:
+    with sqlite3.connect(path_to_db) as connection:
         dbCursor = connection.cursor()
         for ID in ID_list:
             dbCursor.execute(
