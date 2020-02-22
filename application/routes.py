@@ -12,8 +12,8 @@ BAD_REQUEST_ERROR = 400
 @app.route('/home')
 def home():
     users = json.loads(get_persons())
-    print(users[0])
     return render_template('home.html', users=users)
+    # return "hello"
 
 @app.route('/api/v1/person')
 def get_persons():
@@ -40,20 +40,22 @@ def get_persons():
 @app.route('/api/v1/person', methods = ["POST"])
 def post_person():
     
-    # verify that request contains a valid request  
+    # verify that request contains a valid request
+    
     try:
         request_json: Dict = request.get_json()
     except:
         abort(
             BAD_REQUEST_ERROR ,
             description = "Please verify that request contains valid json.")
+    
     try:
         posted_email = request_json['email']
     except:
         abort(
             BAD_REQUEST_ERROR,
             description = "Please verify that  request contains an email.")
-    
+
     # add person to database         
     with sqlite3.connect(path_to_db) as connection:
         cursor = connection.cursor()
@@ -71,8 +73,8 @@ def post_person():
                 ))
         
         # return posted record
-        cursor.execute('SELECT (person_ID, email, givingTo_ID, first_name, '
-                       'last_name) FROM people WHERE '
+        cursor.execute('SELECT person_ID, email, givingTo_ID, first_name, '
+                       'last_name FROM people WHERE '
                        'person_ID=last_insert_rowid();')
         posted_record: List = cursor.fetchone()
         data: Dict = {
@@ -120,7 +122,7 @@ def delete_person(person_id: str) -> str:
         except:
             return(
             'There was an error. Check that the requested ID is valid.')
-    return "user has been removed from database"
+    return f"user {person_id} has been removed from database"
 
 @app.route('/api/v1/forbidden_pairing')
 def get_forbidden_pairings():
